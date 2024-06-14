@@ -4,6 +4,7 @@ import com.learn.short_url_builder.dto.GenerateUrlRequestDto;
 import com.learn.short_url_builder.dto.ModifyUrlRequestDto;
 import com.learn.short_url_builder.dto.RemoveUrlRequestDto;
 import com.learn.short_url_builder.dto.ResponseUrlDto;
+import com.learn.short_url_builder.service.ShortUrlService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,12 @@ import org.springframework.web.servlet.view.RedirectView;
 @RestController
 public class ShortUrlProcessController {
 
+    private final ShortUrlService shortUrlService;
+
+    public ShortUrlProcessController(ShortUrlService shortUrlService) {
+        this.shortUrlService = shortUrlService;
+    }
+
     /**
      * @Desc This endpoint is used to for redirection based on shortUrlId.
      * @param shortUrlId
@@ -19,8 +26,8 @@ public class ShortUrlProcessController {
      */
     @GetMapping("/{shortUrlId}")
     public RedirectView test(@PathVariable String shortUrlId){
-        String externalUrl = "https://en.wikipedia.org/wiki/Sri_Lanka";
-        return new RedirectView(externalUrl);
+        String longUrl = shortUrlService.queryByShortUrlId(shortUrlId);
+        return new RedirectView(longUrl);
     }
 
     /**
@@ -30,8 +37,7 @@ public class ShortUrlProcessController {
      */
     @PostMapping("/api/v1/generate")
     public ResponseEntity<ResponseUrlDto> generateShortUrl(@RequestBody GenerateUrlRequestDto generateUrlRequestDto){
-        ResponseUrlDto responseUrlDto = new ResponseUrlDto();
-        responseUrlDto.setShortUrl("https://rb.gy/090byc");
+        ResponseUrlDto responseUrlDto = shortUrlService.generateShortUrl(generateUrlRequestDto);
         return new ResponseEntity<>(responseUrlDto, HttpStatus.CREATED);
     }
 
@@ -42,8 +48,7 @@ public class ShortUrlProcessController {
      */
     @PutMapping("/api/v1/modify")
     public ResponseEntity<ResponseUrlDto> modifyShortUrl(@RequestBody ModifyUrlRequestDto modifyUrlRequestDto){
-        ResponseUrlDto responseUrlDto = new ResponseUrlDto();
-        responseUrlDto.setShortUrl("https://rb.gy/090byc");
+        ResponseUrlDto responseUrlDto = shortUrlService.modifyShortUrl();
         return new ResponseEntity<>(responseUrlDto, HttpStatus.CREATED);
     }
 
@@ -54,6 +59,7 @@ public class ShortUrlProcessController {
      */
     @DeleteMapping("/api/v1/remove")
     public ResponseEntity<ResponseUrlDto> removeShortUrl(@RequestBody RemoveUrlRequestDto removeUrlRequestDto){
+        shortUrlService.removeShortUrl(removeUrlRequestDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

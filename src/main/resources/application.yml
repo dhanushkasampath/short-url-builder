@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: short-url-builder
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: short-url-builder
+
+server:
+  port: 8081
+
