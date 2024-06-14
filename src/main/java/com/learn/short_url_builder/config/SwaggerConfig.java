@@ -13,17 +13,17 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info()
-                        .title("Short Url Builder API Documentation")
-                        .version("1.0")
-                        .description("Below are the endpoints exposed for the functionality of short url builder"));
+            .info(new Info()
+                .title("Short Url Builder API Documentation")
+                .version("1.0")
+                .description("Below are the endpoints exposed for the functionality of short url builder"));
     }
 
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
-                .group("public")
-                .pathsToMatch("/**")
-                .build();
+            .group("public")
+            .pathsToMatch("/**")
+            .build();
     }
 }
