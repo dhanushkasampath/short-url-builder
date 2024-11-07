@@ -68,7 +68,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     @Override
     public ResponseUrlDto modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
-        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrl(modifyUrlRequestDto.getShortUrl());
+        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrlAndIsDeletedFalse(modifyUrlRequestDto.getShortUrl());
         if(shortUrlData == null){
             throw new ShortUrlBuilderException("Invalid Short Url.");
         }
@@ -81,7 +81,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     @Override
     public void removeShortUrl(RemoveUrlRequestDto removeUrlRequestDto) {
-        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrl(removeUrlRequestDto.getShortUrl());
+        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrlAndIsDeletedFalse(removeUrlRequestDto.getShortUrl());
         if(shortUrlData == null){
             throw new ShortUrlBuilderException("Invalid Short Url.");
         }
@@ -91,7 +91,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     @Override
     public String queryByShortUrlId(String shortUrlId) {
-        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrl(shortUrlId);
+        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrlAndIsDeletedFalse(shortUrlId);
         if(shortUrlData == null){
             throw new ShortUrlBuilderException("Invalid Short Url.");
         }
