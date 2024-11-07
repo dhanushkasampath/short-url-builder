@@ -40,7 +40,7 @@ set up link expiration time
 - if expired not allowed to re-direct(add validation before redirect-added to hql)   ##done
 - If an update to the link happens, then expiry time will move 1 month forward  ##done
 
-ToDo 7 :
+ToDo 7 : done
 Implement rate limiter
 - for create
 - for update

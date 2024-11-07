@@ -25,3 +25,14 @@ link:
   expires:
     in: 30
 
+resilience4j:
+  ratelimiter:
+    instances:
+      myServiceRateLimiter:
+        limit-for-period: 5       # Maximum number of calls allowed within a time period
+        limit-refresh-period: 20s  # Time period after which the rate limiter resets (e.g., 1 second)
+        timeout-duration: 500ms   # Time to wait for permission (optional)
+
+# can test this using hey tool
+#  hey -n 6 -c 6 http://localhost:8081/bGHwPu
+#Above command will send 6 requests at once. Then only 5 will hit to the backend and remaining one will not

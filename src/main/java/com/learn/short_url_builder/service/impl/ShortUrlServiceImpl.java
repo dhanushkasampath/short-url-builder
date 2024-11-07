@@ -9,6 +9,7 @@ import com.learn.short_url_builder.exception.ShortUrlBuilderException;
 import com.learn.short_url_builder.repository.ShortUrlRepository;
 import com.learn.short_url_builder.service.ShortUrlService;
 import com.learn.short_url_builder.util.RandomStringGenerator;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     private int noOfDaysToExpire;
 
     @Override
+    @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForGenerate")
     public ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto) throws UnknownHostException {
 
         String uniqueString = randomStringGenerator.generateRandomString(length);
@@ -72,6 +74,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
+    @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForModify")
     public ResponseUrlDto modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
         Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(modifyUrlRequestDto.getShortUrl());
         if(shortUrlDataOptional.isEmpty()){
@@ -87,6 +90,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
+    @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForRemoval")
     public void removeShortUrl(RemoveUrlRequestDto removeUrlRequestDto) {
         Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(removeUrlRequestDto.getShortUrl());
         if(shortUrlDataOptional.isEmpty()){
@@ -98,11 +102,28 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
+    @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForQuery")
     public String queryByShortUrlId(String shortUrlId) {
         Optional<ShortUrlData> shortUrlData = shortUrlRepository.findByShortUrlAndValidExpiry(shortUrlId);
         if(shortUrlData.isEmpty()){
             throw new ShortUrlBuilderException(INVALID_SHORT_URL);
         }
         return shortUrlData.get().getLongUrl();
+    }
+
+    public String rateLimitFallbackForQuery(Throwable t) {
+        return "Rate limit exceeded. Please try again later.";
+    }
+
+    public ResponseUrlDto rateLimitFallbackForGenerate(Throwable t) {
+        return ResponseUrlDto.builder().shortUrl("Rate limit exceeded. Please try again later.").build();
+    }
+
+    public void rateLimitFallbackForRemoval(Throwable t) {
+
+    }
+
+    public ResponseUrlDto rateLimitFallbackForModify(Throwable t) {
+        return ResponseUrlDto.builder().shortUrl("Rate limit exceeded. Please try again later.").build();
     }
 }
