@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,9 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     @Value("${random}")
     private int length;
 
+    @Value("${link.expires.in}")
+    private int noOfDaysToExpire;
+
     @Override
     public ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto) throws UnknownHostException {
 
@@ -40,7 +44,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .shortUrl(uniqueString)
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
-                .expiryDate(LocalDateTime.now().plusMonths(1))
+                .expiryDate(LocalDateTime.now().plusDays(noOfDaysToExpire))
                 .isDeleted(false)
                 .build();
 
@@ -68,12 +72,14 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     @Override
     public ResponseUrlDto modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
-        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrlAndIsDeletedFalse(modifyUrlRequestDto.getShortUrl());
-        if(shortUrlData == null){
+        Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(modifyUrlRequestDto.getShortUrl());
+        if(shortUrlDataOptional.isEmpty()){
             throw new ShortUrlBuilderException("Invalid Short Url.");
         }
+        ShortUrlData shortUrlData = shortUrlDataOptional.get();
         shortUrlData.setLongUrl(modifyUrlRequestDto.getNewLongUrl());
         shortUrlData.setLastModifiedDate(LocalDateTime.now());
+        shortUrlData.setExpiryDate(LocalDateTime.now().plusDays(noOfDaysToExpire));
         shortUrlRepository.save(shortUrlData);
 
         return ResponseUrlDto.builder().shortUrl(generateRandomUrl(modifyUrlRequestDto.getShortUrl())).build();
@@ -81,20 +87,21 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     @Override
     public void removeShortUrl(RemoveUrlRequestDto removeUrlRequestDto) {
-        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrlAndIsDeletedFalse(removeUrlRequestDto.getShortUrl());
-        if(shortUrlData == null){
+        Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(removeUrlRequestDto.getShortUrl());
+        if(shortUrlDataOptional.isEmpty()){
             throw new ShortUrlBuilderException("Invalid Short Url.");
         }
+        ShortUrlData shortUrlData = shortUrlDataOptional.get();
         shortUrlData.setIsDeleted(true);
         shortUrlRepository.save(shortUrlData);
     }
 
     @Override
     public String queryByShortUrlId(String shortUrlId) {
-        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrlAndIsDeletedFalse(shortUrlId);
-        if(shortUrlData == null){
+        Optional<ShortUrlData> shortUrlData = shortUrlRepository.findByShortUrlAndValidExpiry(shortUrlId);
+        if(shortUrlData.isEmpty()){
             throw new ShortUrlBuilderException("Invalid Short Url.");
         }
-        return shortUrlData.getLongUrl();
+        return shortUrlData.get().getLongUrl();
     }
 }

@@ -21,3 +21,7 @@ random: 6
 #    id:
 #      length: 6
 
+link:
+  expires:
+    in: 30
+

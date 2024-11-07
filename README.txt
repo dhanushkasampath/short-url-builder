@@ -28,3 +28,29 @@ When searching only records with is_deleted = false, should be queried.
 To achieve that I used below method in repository
 
 ShortUrlData findByShortUrlAndIsDeletedFalse(String shortUrl);
+
+ToDO 4 : swagger Integrated - done
+
+ToDo 5 :
+Implement user management. Only Authorized users should able to update and delete
+
+ToDo 6 : done
+set up link expiration time
+- add to property file(1 month).  ## done
+- if expired not allowed to re-direct(add validation before redirect-added to hql)   ##done
+- If an update to the link happens, then expiry time will move 1 month forward  ##done
+
+ToDo 7 :
+Implement rate limiter
+- for create
+- for update
+- for delete
+
+ToDO 8 :
+implement cronjob to remove expired and deleted records
+
+ToDo 9 :
+Implement caching for get request
+-when delete happens, it should delete from cache as well
+
+ToDo 10 : Add logs
