@@ -4,8 +4,10 @@ import com.learn.short_url_builder.dto.GenerateUrlRequestDto;
 import com.learn.short_url_builder.dto.RemoveUrlRequestDto;
 import com.learn.short_url_builder.dto.ResponseUrlDto;
 
+import java.net.UnknownHostException;
+
 public interface ShortUrlService {
-    ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto);
+    ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto) throws UnknownHostException;
 
     ResponseUrlDto modifyShortUrl();
 

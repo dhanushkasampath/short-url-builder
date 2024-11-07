@@ -6,42 +6,66 @@ import com.learn.short_url_builder.dto.ResponseUrlDto;
 import com.learn.short_url_builder.entity.ShortUrlData;
 import com.learn.short_url_builder.repository.ShortUrlRepository;
 import com.learn.short_url_builder.service.ShortUrlService;
+import com.learn.short_url_builder.util.RandomStringGenerator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class ShortUrlServiceImpl implements ShortUrlService {
 
     private final ShortUrlRepository shortUrlRepository;
 
-    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository) {
-        this.shortUrlRepository = shortUrlRepository;
-    }
+    private final RandomStringGenerator randomStringGenerator;
+
+    @Value("${server.port}")
+    private int port;
+
+    @Value("${random}")
+    private int length;
 
     @Override
-    public ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto) {
+    public ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto) throws UnknownHostException {
 
-        ShortUrlData shortUrlDataDocument = new ShortUrlData();
-        shortUrlDataDocument.setId(1L);
-        shortUrlDataDocument.setLongUrl(generateUrlRequestDto.getLongUrl());
-        shortUrlDataDocument.setShortUrl("https://rb.gy/12345");
-        shortUrlDataDocument.setCreatedDate(LocalDateTime.now());
-        shortUrlDataDocument.setLastModifiedDate(LocalDateTime.now());
-        shortUrlDataDocument.setExpiryDate(LocalDateTime.now());
+        String uniqueString = randomStringGenerator.generateRandomString(length);
+        ShortUrlData shortUrlDataDocument = ShortUrlData.builder()
+                .longUrl(generateUrlRequestDto.getLongUrl())
+                .shortUrl(uniqueString)
+                .createdDate(LocalDateTime.now())
+                .lastModifiedDate(LocalDateTime.now())
+                .expiryDate(LocalDateTime.now().plusMonths(1))
+                .build();
+
         shortUrlRepository.save(shortUrlDataDocument);
 
-        ResponseUrlDto responseUrlDto = new ResponseUrlDto();
-        responseUrlDto.setShortUrl("https://rb.gy/12345");
+        return ResponseUrlDto.builder().shortUrl(generateRandomUrl(uniqueString)).build();
+    }
 
-        return responseUrlDto;
+    /**
+     * we can use this method when we need the whole dynamic url
+     * @param uniqueString
+     * @return
+     * @throws UnknownHostException
+     */
+    private String generateRandomUrl(String uniqueString) throws UnknownHostException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("http://");
+        stringBuilder.append(InetAddress.getLocalHost().getHostAddress());
+        stringBuilder.append(":");
+        stringBuilder.append(Integer.toString(this.port));
+        stringBuilder.append("/");
+        stringBuilder.append(uniqueString);
+        return stringBuilder.toString();
     }
 
     @Override
     public ResponseUrlDto modifyShortUrl() {
-        ResponseUrlDto responseUrlDto = new ResponseUrlDto();
-        responseUrlDto.setShortUrl("https://rb.gy/090byc");
-        return responseUrlDto;
+        return ResponseUrlDto.builder().shortUrl("https://rb.gy/090byc").build();
     }
 
     @Override

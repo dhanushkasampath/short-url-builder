@@ -15,3 +15,9 @@ This will show any running mongod processes.
 
 
 =========================================================================
+
+
+ToDo 1 : change the mongodb to mydql - done
+
+If we hardcode the ip and port in the database it will cause an issue if we deploy the service in another instance.
+So better way is to keep only the unique id in the table

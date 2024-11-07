@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.net.UnknownHostException;
+
 @RestController
 public class ShortUrlProcessController {
 
@@ -25,7 +27,7 @@ public class ShortUrlProcessController {
      * @return
      */
     @GetMapping("/{shortUrlId}")
-    public RedirectView test(@PathVariable String shortUrlId){
+    public RedirectView redirectToShortUrl(@PathVariable String shortUrlId){
         String longUrl = shortUrlService.queryByShortUrlId(shortUrlId);
         return new RedirectView(longUrl);
     }
@@ -36,7 +38,8 @@ public class ShortUrlProcessController {
      * @return
      */
     @PostMapping("/api/v1/generate")
-    public ResponseEntity<ResponseUrlDto> generateShortUrl(@RequestBody GenerateUrlRequestDto generateUrlRequestDto){
+    public ResponseEntity<ResponseUrlDto> generateShortUrl(@RequestBody GenerateUrlRequestDto generateUrlRequestDto)
+            throws UnknownHostException {
         ResponseUrlDto responseUrlDto = shortUrlService.generateShortUrl(generateUrlRequestDto);
         return new ResponseEntity<>(responseUrlDto, HttpStatus.CREATED);
     }
