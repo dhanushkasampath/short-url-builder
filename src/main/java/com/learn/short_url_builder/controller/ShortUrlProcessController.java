@@ -50,8 +50,8 @@ public class ShortUrlProcessController {
      * @return
      */
     @PutMapping("/api/v1/modify")
-    public ResponseEntity<ResponseUrlDto> modifyShortUrl(@RequestBody ModifyUrlRequestDto modifyUrlRequestDto){
-        ResponseUrlDto responseUrlDto = shortUrlService.modifyShortUrl();
+    public ResponseEntity<ResponseUrlDto> modifyShortUrl(@RequestBody ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
+        ResponseUrlDto responseUrlDto = shortUrlService.modifyShortUrl(modifyUrlRequestDto);
         return new ResponseEntity<>(responseUrlDto, HttpStatus.CREATED);
     }
 

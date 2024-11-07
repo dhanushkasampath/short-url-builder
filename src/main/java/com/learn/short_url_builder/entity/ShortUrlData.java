@@ -36,4 +36,7 @@ public class ShortUrlData {
     @Column
     private LocalDateTime lastModifiedDate;
 
+    @Column
+    private Boolean isDeleted;
+
 }

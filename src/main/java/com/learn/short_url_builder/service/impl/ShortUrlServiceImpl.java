@@ -1,9 +1,11 @@
 package com.learn.short_url_builder.service.impl;
 
 import com.learn.short_url_builder.dto.GenerateUrlRequestDto;
+import com.learn.short_url_builder.dto.ModifyUrlRequestDto;
 import com.learn.short_url_builder.dto.RemoveUrlRequestDto;
 import com.learn.short_url_builder.dto.ResponseUrlDto;
 import com.learn.short_url_builder.entity.ShortUrlData;
+import com.learn.short_url_builder.exception.ShortUrlBuilderException;
 import com.learn.short_url_builder.repository.ShortUrlRepository;
 import com.learn.short_url_builder.service.ShortUrlService;
 import com.learn.short_url_builder.util.RandomStringGenerator;
@@ -39,6 +41,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .expiryDate(LocalDateTime.now().plusMonths(1))
+                .isDeleted(false)
                 .build();
 
         shortUrlRepository.save(shortUrlDataDocument);
@@ -64,17 +67,34 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
-    public ResponseUrlDto modifyShortUrl() {
-        return ResponseUrlDto.builder().shortUrl("https://rb.gy/090byc").build();
+    public ResponseUrlDto modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
+        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrl(modifyUrlRequestDto.getShortUrl());
+        if(shortUrlData == null){
+            throw new ShortUrlBuilderException("Invalid Short Url.");
+        }
+        shortUrlData.setLongUrl(modifyUrlRequestDto.getNewLongUrl());
+        shortUrlData.setLastModifiedDate(LocalDateTime.now());
+        shortUrlRepository.save(shortUrlData);
+
+        return ResponseUrlDto.builder().shortUrl(generateRandomUrl(modifyUrlRequestDto.getShortUrl())).build();
     }
 
     @Override
     public void removeShortUrl(RemoveUrlRequestDto removeUrlRequestDto) {
-
+        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrl(removeUrlRequestDto.getShortUrl());
+        if(shortUrlData == null){
+            throw new ShortUrlBuilderException("Invalid Short Url.");
+        }
+        shortUrlData.setIsDeleted(true);
+        shortUrlRepository.save(shortUrlData);
     }
 
     @Override
     public String queryByShortUrlId(String shortUrlId) {
-        return "https://en.wikipedia.org/wiki/Sri_Lanka";
+        ShortUrlData shortUrlData = shortUrlRepository.findByShortUrl(shortUrlId);
+        if(shortUrlData == null){
+            throw new ShortUrlBuilderException("Invalid Short Url.");
+        }
+        return shortUrlData.getLongUrl();
     }
 }
