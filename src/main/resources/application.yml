@@ -1,11 +1,17 @@
 spring:
   application:
     name: short-url-builder
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-      database: short-url-builder
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/short-url-builder?createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
 
 server:
   port: 8081

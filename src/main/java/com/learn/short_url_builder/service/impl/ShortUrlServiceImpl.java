@@ -3,7 +3,7 @@ package com.learn.short_url_builder.service.impl;
 import com.learn.short_url_builder.dto.GenerateUrlRequestDto;
 import com.learn.short_url_builder.dto.RemoveUrlRequestDto;
 import com.learn.short_url_builder.dto.ResponseUrlDto;
-import com.learn.short_url_builder.model.ShortUrlDocument;
+import com.learn.short_url_builder.entity.ShortUrlData;
 import com.learn.short_url_builder.repository.ShortUrlRepository;
 import com.learn.short_url_builder.service.ShortUrlService;
 import org.springframework.stereotype.Service;
@@ -22,17 +22,17 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     @Override
     public ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto) {
 
-        ShortUrlDocument shortUrlDocument = new ShortUrlDocument();
-        shortUrlDocument.setId(1L);
-        shortUrlDocument.setLongUrl(generateUrlRequestDto.getLongUrl());
-        shortUrlDocument.setShortUrl("https://rb.gy/090byc");
-        shortUrlDocument.setCreatedDate(LocalDateTime.now());
-        shortUrlDocument.setLastModifiedDate(LocalDateTime.now());
-        shortUrlDocument.setExpiryDate(LocalDateTime.now());
-        shortUrlRepository.save(shortUrlDocument);
+        ShortUrlData shortUrlDataDocument = new ShortUrlData();
+        shortUrlDataDocument.setId(1L);
+        shortUrlDataDocument.setLongUrl(generateUrlRequestDto.getLongUrl());
+        shortUrlDataDocument.setShortUrl("https://rb.gy/12345");
+        shortUrlDataDocument.setCreatedDate(LocalDateTime.now());
+        shortUrlDataDocument.setLastModifiedDate(LocalDateTime.now());
+        shortUrlDataDocument.setExpiryDate(LocalDateTime.now());
+        shortUrlRepository.save(shortUrlDataDocument);
 
         ResponseUrlDto responseUrlDto = new ResponseUrlDto();
-        responseUrlDto.setShortUrl("https://rb.gy/090byc");
+        responseUrlDto.setShortUrl("https://rb.gy/12345");
 
         return responseUrlDto;
     }
