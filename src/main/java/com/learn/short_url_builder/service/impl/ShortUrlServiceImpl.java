@@ -22,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ShortUrlServiceImpl implements ShortUrlService {
 
+    public static final String INVALID_SHORT_URL = "Invalid Short Url.";
     private final ShortUrlRepository shortUrlRepository;
 
     private final RandomStringGenerator randomStringGenerator;
@@ -74,7 +75,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     public ResponseUrlDto modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
         Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(modifyUrlRequestDto.getShortUrl());
         if(shortUrlDataOptional.isEmpty()){
-            throw new ShortUrlBuilderException("Invalid Short Url.");
+            throw new ShortUrlBuilderException(INVALID_SHORT_URL);
         }
         ShortUrlData shortUrlData = shortUrlDataOptional.get();
         shortUrlData.setLongUrl(modifyUrlRequestDto.getNewLongUrl());
@@ -89,7 +90,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     public void removeShortUrl(RemoveUrlRequestDto removeUrlRequestDto) {
         Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(removeUrlRequestDto.getShortUrl());
         if(shortUrlDataOptional.isEmpty()){
-            throw new ShortUrlBuilderException("Invalid Short Url.");
+            throw new ShortUrlBuilderException(INVALID_SHORT_URL);
         }
         ShortUrlData shortUrlData = shortUrlDataOptional.get();
         shortUrlData.setIsDeleted(true);
@@ -100,7 +101,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     public String queryByShortUrlId(String shortUrlId) {
         Optional<ShortUrlData> shortUrlData = shortUrlRepository.findByShortUrlAndValidExpiry(shortUrlId);
         if(shortUrlData.isEmpty()){
-            throw new ShortUrlBuilderException("Invalid Short Url.");
+            throw new ShortUrlBuilderException(INVALID_SHORT_URL);
         }
         return shortUrlData.get().getLongUrl();
     }

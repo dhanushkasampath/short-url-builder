@@ -53,4 +53,4 @@ ToDo 9 :
 Implement caching for get request
 -when delete happens, it should delete from cache as well
 
-ToDo 10 : Add logs
+ToDo 10 : Add logs - done
