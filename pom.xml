@@ -69,6 +69,12 @@
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 
+<!--		below dependency is to add a timeout to the cache-->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+
 
 	</dependencies>
 

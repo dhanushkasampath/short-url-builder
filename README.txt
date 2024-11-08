@@ -50,13 +50,14 @@ Implement rate limiter
 ToDO 8 :
 implement cronjob to remove expired and deleted records
 
-ToDo 9 : In-Progress
-- Implement caching for get request - done
+ToDo 9 : done
+- 9.1 Implement caching for get request - done
 
 We can verify this as follows.
 When caching enabled the second request does not come to the service layer. no any log at service layer level get appeared in console
 
-- when update happens, it should update the cache as well
+- 9.2 when update happens, it should update the cache as well - done
+
 1. first I implemented caching for query endpoint
 2. Requested that resource for the first time. Then it got the data from db and served me
 3. Then I requested for 2nd time. Then it did not get data from db. but from cache and served me
@@ -67,11 +68,37 @@ note : cache is working with the help of return type and return value
 in both cache generating and updating. So make sure the value we return when generating and updating the
 cache is same and in updating cache, it's the new value we updated
 
-- when delete happens, it should delete from cache as well
+- 9.3 when delete happens, it should delete from cache as well - In-Progress
+
+@CacheEvict
+it's not mandatory to that the return type of this method should not match the @Cacheable or @CachePut
+
+- 9.4 Implement cache timeout - done
+
+With spring-boot-starter-cache, configuring a cache timeout (TTL) depends on the specific cache provider that you
+configure alongside the starter. spring-boot-starter-cache provides the abstraction, but you’ll need to pick a
+concrete caching provider to control features like timeouts. Here’s how to set it up with commonly used providers:
+
+9.4.1) Add Caffeine to your project:
+
+<dependency>
+    <groupId>com.github.ben-manes.caffeine</groupId>
+    <artifactId>caffeine</artifactId>
+</dependency>
+
+9.4.2) Configure Caffeine Cache Timeout in application.yml:
+
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=5m
+
+This worked fine. refer the image in READMORE dir
 
 http://localhost:8081/actuator/caches  <- use this endpoint to check that caching has set up properly
 
-===========ISSUE I FACED=========================
+===========ISSUE I FACED===========This still remains==============
 i implemented spring-boot-starter-cache in my project to a particular endpoint.
 Also I have implemented rate limiter by giving below properties to that endpoint.
 

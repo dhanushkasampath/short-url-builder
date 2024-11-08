@@ -13,6 +13,7 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class ShortUrlServiceImpl implements ShortUrlService {
 
     public static final String INVALID_SHORT_URL = "Invalid Short Url.";
+    public static final String RATE_LIMIT_EXCEEDED_PLEASE_TRY_AGAIN_LATER = "Rate limit exceeded. Please try again later.";
     private final ShortUrlRepository shortUrlRepository;
 
     private final RandomStringGenerator randomStringGenerator;
@@ -97,6 +99,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "query-short-url", key = "#removeUrlRequestDto.shortUrl") // it's not mandatory to that the return type of this method should not match the @Cacheable or @CachePut
     @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForRemoval")
     public void removeShortUrl(RemoveUrlRequestDto removeUrlRequestDto) {
         Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(removeUrlRequestDto.getShortUrl());
@@ -109,7 +112,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
-    @Cacheable(cacheNames = "query-short-url", key = "#shortUrl") //<- this is the key for cache
+    @Cacheable(cacheNames = "query-short-url", key = "#shortUrl") // '#shortUrl '<- this is the key for cache | 'query-short-url' <- This is the cache object
     @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForQuery")
     public String queryByShortUrlId(String shortUrl) {
         log.info("Service layer received the request | to queryByShortUrlId");
@@ -121,18 +124,18 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     public String rateLimitFallbackForQuery(Throwable t) {
-        return "Rate limit exceeded. Please try again later.";
+        return RATE_LIMIT_EXCEEDED_PLEASE_TRY_AGAIN_LATER;
     }
 
     public ResponseUrlDto rateLimitFallbackForGenerate(Throwable t) {
-        return ResponseUrlDto.builder().shortUrl("Rate limit exceeded. Please try again later.").build();
+        return ResponseUrlDto.builder().shortUrl(RATE_LIMIT_EXCEEDED_PLEASE_TRY_AGAIN_LATER).build();
     }
 
     public void rateLimitFallbackForRemoval(Throwable t) {
-
+        // This is a void method
     }
 
     public String rateLimitFallbackForModify(Throwable t) {
-        return "Rate limit exceeded. Please try again later.";
+        return RATE_LIMIT_EXCEEDED_PLEASE_TRY_AGAIN_LATER;
     }
 }
