@@ -10,7 +10,7 @@ import java.net.UnknownHostException;
 public interface ShortUrlService {
     ResponseUrlDto generateShortUrl(GenerateUrlRequestDto generateUrlRequestDto) throws UnknownHostException;
 
-    ResponseUrlDto modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException;
+    String modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException;
 
     void removeShortUrl(RemoveUrlRequestDto removeUrlRequestDto);
 

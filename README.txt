@@ -51,9 +51,23 @@ ToDO 8 :
 implement cronjob to remove expired and deleted records
 
 ToDo 9 : In-Progress
-Implement caching for get request - done
--when update happens, it should update the cache as well
--when delete happens, it should delete from cache as well
+- Implement caching for get request - done
+
+We can verify this as follows.
+When caching enabled the second request does not come to the service layer. no any log at service layer level get appeared in console
+
+- when update happens, it should update the cache as well
+1. first I implemented caching for query endpoint
+2. Requested that resource for the first time. Then it got the data from db and served me
+3. Then I requested for 2nd time. Then it did not get data from db. but from cache and served me
+4. Then I changed the long url using modify endpoint and again requested. Unfortunately I got the previous data.
+That means, since I have updated the db, the cache has not been updated.
+
+note : cache is working with the help of return type and return value
+in both cache generating and updating. So make sure the value we return when generating and updating the
+cache is same and in updating cache, it's the new value we updated
+
+- when delete happens, it should delete from cache as well
 
 http://localhost:8081/actuator/caches  <- use this endpoint to check that caching has set up properly
 

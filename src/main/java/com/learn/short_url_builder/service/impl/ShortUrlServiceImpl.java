@@ -13,6 +13,7 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -77,8 +78,9 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
+    @CachePut(cacheNames = "query-short-url", key = "#modifyUrlRequestDto.shortUrl")
     @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForModify")
-    public ResponseUrlDto modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
+    public String modifyShortUrl(ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
         Optional<ShortUrlData> shortUrlDataOptional = shortUrlRepository.findByShortUrlAndValidExpiry(modifyUrlRequestDto.getShortUrl());
         if(shortUrlDataOptional.isEmpty()){
             throw new ShortUrlBuilderException(INVALID_SHORT_URL);
@@ -89,7 +91,9 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         shortUrlData.setExpiryDate(LocalDateTime.now().plusDays(noOfDaysToExpire));
         shortUrlRepository.save(shortUrlData);
 
-        return ResponseUrlDto.builder().shortUrl(generateRandomUrl(modifyUrlRequestDto.getShortUrl())).build();
+        return modifyUrlRequestDto.getNewLongUrl(); //cache is working with the help of return type and return value
+        // in both cache generating and updating. So make sure the value we return when generating cache and updating
+        // cache is same and in updating cache, its the next value we updated
     }
 
     @Override
@@ -105,15 +109,15 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
-    @Cacheable(cacheNames = "query-short-url", key = "#shortUrlId")
+    @Cacheable(cacheNames = "query-short-url", key = "#shortUrl") //<- this is the key for cache
     @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForQuery")
-    public String queryByShortUrlId(String shortUrlId) {
+    public String queryByShortUrlId(String shortUrl) {
         log.info("Service layer received the request | to queryByShortUrlId");
-        Optional<ShortUrlData> shortUrlData = shortUrlRepository.findByShortUrlAndValidExpiry(shortUrlId);
+        Optional<ShortUrlData> shortUrlData = shortUrlRepository.findByShortUrlAndValidExpiry(shortUrl);
         if(shortUrlData.isEmpty()){
             throw new ShortUrlBuilderException(INVALID_SHORT_URL);
         }
-        return shortUrlData.get().getLongUrl();
+        return shortUrlData.get().getLongUrl(); //<-this is the value for cache | in update method also we need to return the new long url
     }
 
     public String rateLimitFallbackForQuery(Throwable t) {
@@ -128,7 +132,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     }
 
-    public ResponseUrlDto rateLimitFallbackForModify(Throwable t) {
-        return ResponseUrlDto.builder().shortUrl("Rate limit exceeded. Please try again later.").build();
+    public String rateLimitFallbackForModify(Throwable t) {
+        return "Rate limit exceeded. Please try again later.";
     }
 }

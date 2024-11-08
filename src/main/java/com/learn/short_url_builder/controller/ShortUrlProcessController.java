@@ -1,9 +1,6 @@
 package com.learn.short_url_builder.controller;
 
-import com.learn.short_url_builder.dto.GenerateUrlRequestDto;
-import com.learn.short_url_builder.dto.ModifyUrlRequestDto;
-import com.learn.short_url_builder.dto.RemoveUrlRequestDto;
-import com.learn.short_url_builder.dto.ResponseUrlDto;
+import com.learn.short_url_builder.dto.*;
 import com.learn.short_url_builder.service.ShortUrlService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -54,10 +51,11 @@ public class ShortUrlProcessController {
      * @return
      */
     @PutMapping("/api/v1/modify")
-    public ResponseEntity<ResponseUrlDto> modifyShortUrl(@RequestBody ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
+    public ResponseEntity<ModifyResponseUrlDto> modifyShortUrl(@RequestBody ModifyUrlRequestDto modifyUrlRequestDto) throws UnknownHostException {
         log.info("Request received to modify the short-url:{}", modifyUrlRequestDto);
-        ResponseUrlDto responseUrlDto = shortUrlService.modifyShortUrl(modifyUrlRequestDto);
-        return new ResponseEntity<>(responseUrlDto, HttpStatus.CREATED);
+        String longUrl = shortUrlService.modifyShortUrl(modifyUrlRequestDto);
+        ModifyResponseUrlDto modifyResponseUrlDto = ModifyResponseUrlDto.builder().longUrl(longUrl).build();
+        return new ResponseEntity<>(modifyResponseUrlDto, HttpStatus.CREATED);
     }
 
     /**
