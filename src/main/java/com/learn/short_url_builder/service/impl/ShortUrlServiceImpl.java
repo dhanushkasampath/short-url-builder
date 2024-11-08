@@ -11,7 +11,9 @@ import com.learn.short_url_builder.service.ShortUrlService;
 import com.learn.short_url_builder.util.RandomStringGenerator;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
@@ -19,6 +21,7 @@ import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShortUrlServiceImpl implements ShortUrlService {
@@ -102,8 +105,10 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
+    @Cacheable(cacheNames = "query-short-url", key = "#shortUrlId")
     @RateLimiter(name = "myServiceRateLimiter", fallbackMethod = "rateLimitFallbackForQuery")
     public String queryByShortUrlId(String shortUrlId) {
+        log.info("Service layer received the request | to queryByShortUrlId");
         Optional<ShortUrlData> shortUrlData = shortUrlRepository.findByShortUrlAndValidExpiry(shortUrlId);
         if(shortUrlData.isEmpty()){
             throw new ShortUrlBuilderException(INVALID_SHORT_URL);

@@ -36,3 +36,10 @@ resilience4j:
 # can test this using hey tool
 #  hey -n 6 -c 6 http://localhost:8081/bGHwPu
 #Above command will send 6 requests at once. Then only 5 will hit to the backend and remaining one will not
+
+#In order to cache function, This actuator property must be added
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

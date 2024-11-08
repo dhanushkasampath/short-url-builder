@@ -42,6 +42,7 @@ set up link expiration time
 
 ToDo 7 : done
 Implement rate limiter
+- for query
 - for create
 - for update
 - for delete
@@ -49,8 +50,33 @@ Implement rate limiter
 ToDO 8 :
 implement cronjob to remove expired and deleted records
 
-ToDo 9 :
-Implement caching for get request
+ToDo 9 : In-Progress
+Implement caching for get request - done
+-when update happens, it should update the cache as well
 -when delete happens, it should delete from cache as well
+
+http://localhost:8081/actuator/caches  <- use this endpoint to check that caching has set up properly
+
+===========ISSUE I FACED=========================
+i implemented spring-boot-starter-cache in my project to a particular endpoint.
+Also I have implemented rate limiter by giving below properties to that endpoint.
+
+
+resilience4j:
+  ratelimiter:
+    instances:
+      myServiceRateLimiter:
+        limit-for-period: 5
+        limit-refresh-period: 20s
+        timeout-duration: 500ms
+
+Then When I call the below actuator endpoint to see whether the caching is working,
+I can see in the logs, Automatically 5 requests are getting hitted to the above endpoint.
+Why is that?
+
+
+http://localhost:8081/actuator/caches
+
+=========================================
 
 ToDo 10 : Add logs - done
