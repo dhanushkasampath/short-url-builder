@@ -37,7 +37,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     @Value("${server.port}")
     private int port;
 
-    @Value("${random}")
+    @Value("${length.of.random.id}")
     private int length;
 
     @Value("${link.expires.in}")
